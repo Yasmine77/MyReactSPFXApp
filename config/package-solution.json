@@ -1,0 +1,40 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/spfx-build/package-solution.schema.json",
+  "solution": {
+    "name": "my-react-spfx-app-client-side-solution",
+    "id": "7c303c3e-e38d-46e7-b56d-3a392879190d",
+    "version": "1.0.0.0",
+    "includeClientSideAssets": true,
+    "skipFeatureDeployment": true,
+    "isDomainIsolated": false,
+    "developer": {
+      "name": "",
+      "websiteUrl": "",
+      "privacyUrl": "",
+      "termsOfUseUrl": "",
+      "mpnId": "Undefined-1.19.0"
+    },
+    "metadata": {
+      "shortDescription": {
+        "default": "my-react-spfx-app description"
+      },
+      "longDescription": {
+        "default": "my-react-spfx-app description"
+      },
+      "screenshotPaths": [],
+      "videoUrl": "",
+      "categories": []
+    },
+    "features": [
+      {
+        "title": "my-react-spfx-app Feature",
+        "description": "The feature that activates elements of the my-react-spfx-app solution.",
+        "id": "a8ad7c83-cbfd-4c2f-ada8-96eb29882353",
+        "version": "1.0.0.0"
+      }
+    ]
+  },
+  "paths": {
+    "zippedPackage": "solution/my-react-spfx-app.sppkg"
+  }
+}
