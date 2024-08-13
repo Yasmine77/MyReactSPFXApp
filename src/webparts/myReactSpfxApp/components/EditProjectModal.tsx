@@ -17,6 +17,7 @@ interface EditProjectModalProps {
 const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, selectedProject ,mode}) => {
   console.log(selectedProject)
   const [selectedPolicyType, setSelectedPolicyType] = useState<string>('');
+  const [selectedProjectId, setSelectedProjectId] = useState<string>('');
   const [policyTypes, setPolicyTypes] = useState<IListItem[]>([]);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, sele
   useEffect(() => {
     if (selectedProject) {
       setSelectedPolicyType(selectedProject.InitiativeType ?? '');
+      setSelectedProjectId(selectedProject.ID)
     } 
   }, [selectedProject]);
 
@@ -77,7 +79,7 @@ const EditProjectModal: React.FC<EditProjectModalProps> = ({ open, onClose, sele
               />
             ))}
           </RadioGroup>
-        <ProjectForm initiativeType={selectedPolicyType} project={selectedProject} mode={mode} />
+        <ProjectForm initiativeType={selectedPolicyType} project={selectedProject} mode={mode} selectedProjectId={selectedProjectId} />
       </Box>
     </DialogContent>
   </Dialog>

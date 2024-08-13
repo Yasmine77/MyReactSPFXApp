@@ -22,7 +22,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ButtonBar from './ButtonBar';
 import AddProjectModal from './AddProjectModal';
 import { RowData, Column } from './types';
-import { getAllProjectsByCurrentUser ,updateItemById,deleteItem} from '../../services/sharepointService'; // Adjust import path as necessary
+import { getAllProjectsByCurrentUser ,updateItemById,deleteItem,getRelatedTabByProject} from '../../services/sharepointService'; // Adjust import path as necessary
 import TablePagination from '@mui/material/TablePagination';
 import CustomChip from './CustomChip'; // Import CustomChip
 import { tagColors } from './CustomChip'; // Adjust path as necessary
@@ -42,21 +42,60 @@ const CustomTable: React.FC<CustomTableProps> = ({ columns, data, setData }) => 
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [filterText, setFilterText] = useState('');
   const [selectedColumn, setSelectedColumn] = useState('');
-  
 
+  const fetchCountries = async (listName: string, currentItemId: number) => {
+    try {
+      const countries = await getRelatedTabByProject(listName, currentItemId);
+      const countryNames = countries.map(country => country.Title).join('; ');
+      console.log('Countries:', countryNames);
+      return countryNames;
+    } catch (error) {
+      console.error('Error fetching countries:', error);
+      return ''; // Return an empty string or handle the error accordingly
+    }
+  };
+  
+  const fetchDonors = async (listName: string, currentItemId: number) => {
+    try {
+      const donors = await getRelatedTabByProject(listName, currentItemId);
+      const donorNames = donors.map(donor => donor.FundingPartnerName).join('; ');
+      console.log('DonorNames:', donorNames);
+      return donorNames;
+    } catch (error) {
+      console.error('Error fetching donors:', error);
+      return ''; // Return an empty string or handle the error accordingly
+    }
+  };
+  
   const fetchProjects = async () => {
     try {
+      // Fetch all projects
       const projects = await getAllProjectsByCurrentUser('Project');
-      const formattedProjects = projects.map((project: any) => ({
-        ...project,
-        id: project.ID,
+  
+      // Use Promise.all to handle async operations inside map
+      const formattedProjects = await Promise.all(projects.map(async (project: any) => {
+        // Fetch countries and donors for each project
+        const countryNames = await fetchCountries('CountryImplementation', project.ID);
+        const donorNames = await fetchDonors('Funding', project.ID);
+  
+        return {
+          ...project,
+          id: project.ID, // Preserve SharePoint ID
+          countryImplementation: countryNames,
+          donorsNames: donorNames
+        };
       }));
+  
       setData(formattedProjects);
-      console.log(formattedProjects)
+      console.log('Formatted Projects:', formattedProjects);
     } catch (error) {
       console.error('Error fetching projects:', error);
     }
   };
+  
+
+ 
+
   /*useEffect(() => {
     const fetchData = async () => {
       try {
@@ -123,16 +162,11 @@ const CustomTable: React.FC<CustomTableProps> = ({ columns, data, setData }) => 
   const handleDeleteSelected = async() => {
     if (selectedRows.length > 0) {
       const selectedIndex = selectedRows[0];
-      const projectToEdit = data[selectedIndex];
-      sessionStorage.removeItem('createdItemId');
-      setSelectedProject(projectToEdit);
-      sessionStorage.setItem('createdItemId', projectToEdit.id.toString());
-      var projectId = Number(sessionStorage.getItem('createdItemId'));
-  
+      const projectToEdit = data[selectedIndex];  
       try {
         const deleteDataPromises = data.map(async (item, index) => {
           if (selectedRows.includes(index)) {
-            await deleteItem("Project", projectId);
+            await deleteItem("Project", projectToEdit.id);
           }
           return item;
         });
@@ -149,10 +183,13 @@ const CustomTable: React.FC<CustomTableProps> = ({ columns, data, setData }) => 
 
   const handleAdd = () => {
     setModalOpen(true);
+    fetchProjects();
   };
 
   const handleCloseModal = () => {
     setModalOpen(false);
+    fetchProjects();
+   
   };
 
   const handleApprove = async () => {
@@ -179,6 +216,7 @@ const CustomTable: React.FC<CustomTableProps> = ({ columns, data, setData }) => 
   
         // Update state with new data
         setData(updatedData);
+        fetchProjects();
   
         // Optionally, handle success or show a message
         console.log('Item updated and data refreshed');
@@ -320,6 +358,7 @@ const CustomTable: React.FC<CustomTableProps> = ({ columns, data, setData }) => 
         open={modalOpen}
         onClose={handleCloseModal}
         mode="new"
+        
       />
       <EditProjectModal
         open={editModalOpen}

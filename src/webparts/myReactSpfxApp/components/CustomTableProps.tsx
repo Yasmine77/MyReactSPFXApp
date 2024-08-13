@@ -14,6 +14,8 @@ export interface Column {
     Status: string;
     Approved: string;
     Type:string;
+    countryImplementation?:string
+    donorsNames?:string
   }
 
 

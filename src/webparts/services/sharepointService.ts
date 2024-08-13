@@ -173,16 +173,16 @@ export const updateItemById = async (listName: string, itemId: number, data: obj
   }
 };
 
-export const getRelatedTabByProject = async (listName: string): Promise<any[]> => {
+export const getRelatedTabByProject = async (listName: string, projectRefID: number) : Promise<any[]> => {
   const _sp: SPFI = getSP();
   const spCache = spfi(_sp).using(Caching({ store: "session" }));
 
   try {
-    const currentProjectID = sessionStorage.getItem('createdItemId');
+    
     const items = await spCache.web.lists
       .getByTitle(listName)
       .items.select()
-      .filter(`ProjectReferenceID eq '${currentProjectID}'`)();
+      .filter(`ProjectReferenceID eq '${projectRefID}'`)();
     console.log(`Fetched items from ${listName}:`, items);
     return items;
   } catch (err) {

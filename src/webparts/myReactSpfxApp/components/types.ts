@@ -16,9 +16,11 @@ export interface RowData {
     status?: string;  
     color?: string;
     Approved?: string;   
-   // CountryImplimentation:string;
+    countryImplementation:string;
+    donorsNames:string;
   }
   export interface RowDataFunding {
+    id?:number;
     ProjectReferenceID: number;
     FundingPartnerCompany: string;
     FundingPartnerName: string;
@@ -27,6 +29,7 @@ export interface RowData {
   }
 
   export interface RowDataImplOrg { 
+    id?:number;
     ProjectReferenceID: number;
     Category: string;
     ImplementingOrganisation: string;
@@ -34,10 +37,12 @@ export interface RowData {
   }
 
   export interface RowDataCountryImp {
+    id?:number;
     ProjectReferenceID: number;
     Title: string;
   }  
   export interface RowDataJVAP {
+    id?:number;
     ProjectReferenceID: number;
     JVAPDomains: string;
     JVAPPriorities: string;

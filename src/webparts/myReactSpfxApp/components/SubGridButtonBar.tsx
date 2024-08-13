@@ -35,7 +35,7 @@ const SubGridButtonBar: React.FC<SubGridButtonBarProps> = ({
         </Button>
       )}
     
-      <Box ml={1}>
+    <Box ml={1}>
         <Button
           startIcon={<GridViewIcon />}
           onClick={onEdit}

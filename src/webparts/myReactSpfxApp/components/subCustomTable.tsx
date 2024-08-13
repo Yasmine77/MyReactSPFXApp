@@ -1,10 +1,22 @@
 import * as React from 'react';
 import { useState, useEffect } from 'react';
-import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Checkbox, Button, TextField, Select, MenuItem } from '@mui/material';
+import {
+  Box,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Checkbox,
+  Button,
+  TextField,
+  Autocomplete,
+} from '@mui/material';
 import CircleOutlinedIcon from '@mui/icons-material/CircleOutlined';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import SubGridButtonBar from './SubGridButtonBar';
-import { SelectChangeEvent } from '@mui/material/Select';
 import { getListItems, IListItem } from '../../services/sharepointService';
 
 interface Column {
@@ -13,7 +25,7 @@ interface Column {
 }
 
 interface RowData {
-  ProjectReferenceID?: number;
+  id?: number;
   [key: string]: any;
 }
 
@@ -26,9 +38,21 @@ interface SubCustomTableProps {
   headerColor?: string;
   ButtonTitle?: string;
   saveRow?: (row: RowData) => void;
+  mode: string;
+
 }
 
-const SubCustomTable: React.FC<SubCustomTableProps> = ({ columns, data, onAdd, onEdit, onDelete, headerColor, saveRow ,ButtonTitle}) => {
+const SubCustomTable: React.FC<SubCustomTableProps> = ({
+  columns,
+  data,
+  onAdd,
+  onEdit,
+  onDelete,
+  headerColor,
+  saveRow,
+  ButtonTitle,
+  mode
+}) => {
   const [Country, setCountry] = useState<IListItem[]>([]);
   const [InstitutionTypes, setInstitutionTypes] = useState<IListItem[]>([]);
   const [CountryType, setCountryType] = useState<IListItem[]>([]);
@@ -57,7 +81,6 @@ const SubCustomTable: React.FC<SubCustomTableProps> = ({ columns, data, onAdd, o
 
         const JVAPPrioritiesTypeItems = await getListItems('JVAP_PRIORITIES');
         setJVAPPriorities(JVAPPrioritiesTypeItems);
-
 
         const implementingOrganisationListItems = await getListItems('IMPLEMENTATION_ORGANISATION_TYPES');
         setImplementingOrganisationList(implementingOrganisationListItems);
@@ -91,14 +114,9 @@ const SubCustomTable: React.FC<SubCustomTableProps> = ({ columns, data, onAdd, o
     setNewRow((prevNewRow) => ({ ...prevNewRow, [name]: value }));
   };
 
-  const handleSelectChangeNewRow = (event: SelectChangeEvent<any>) => {
-    const { name, value } = event.target;
-    setNewRow((prevNewRow) => ({ ...prevNewRow, [name]: value }));
-  };
-
   const handleSaveNewRow = () => {
     if (newRow && Object.keys(newRow).length > 0) {
-      const newRowWithId = { ...newRow, ProjectReferenceID:  Number(sessionStorage.getItem('createdItemId')) };
+      const newRowWithId = { ...newRow, ProjectReferenceID: Number(sessionStorage.getItem('createdItemId')) };
       setRows([...rows, newRowWithId]);
       setNewRow(null);
       setEditingRow(null);
@@ -121,15 +139,6 @@ const SubCustomTable: React.FC<SubCustomTableProps> = ({ columns, data, onAdd, o
     );
   };
 
-  const handleSelectChangeEditRow = (index: number, event: SelectChangeEvent<any>) => {
-    const { name, value } = event.target;
-    setRows((prevRows) =>
-      prevRows.map((row, i) =>
-        i === index ? { ...row, [name]: value } : row
-      )
-    );
-  };
-
   const handleEditRow = (index: number) => {
     setEditingRow(index);
     if (rows[index]) {
@@ -140,19 +149,36 @@ const SubCustomTable: React.FC<SubCustomTableProps> = ({ columns, data, onAdd, o
     }
   };
 
-  const handleSaveEdit = () => {
+  /*const handleSaveEdit = () => {
     if (editingRow !== null) {
       setEditingRow(null);
       const rowToSave = rows[editingRow];
       if (saveRow) saveRow(rowToSave);
     }
-  };
+  };*/
 
   const handleDeleteSelected = () => {
     const updatedRows = rows.filter((_, index) => !selectedRows.includes(index));
     setRows(updatedRows);
     setSelectedRows([]);
     if (onDelete) onDelete();
+  };
+
+  const handleSelectChangeNewRow = (columnId: string, newValue: string | null) => {
+    setNewRow((prevRow) => ({
+      ...prevRow,
+      [columnId]: newValue || '',
+    }));
+  };
+
+  const handleSelectChangeEditRow = (index: number, columnId: string, newValue: string | null) => {
+    setRows((prevRows) =>
+      prevRows.map((row, rowIndex) =>
+        rowIndex === index
+          ? { ...row, [columnId]: newValue || '' }
+          : row
+      )
+    );
   };
 
   const shouldShowAddNewButton = selectedRows.length === 0;
@@ -162,13 +188,13 @@ const SubCustomTable: React.FC<SubCustomTableProps> = ({ columns, data, onAdd, o
   };
 
   const dropDownOptions: { [key: string]: string[] } = {
-    Title: Country.map(item => item.Title),
-    Category: InstitutionTypes.map(item => item.Title),
-    FundingPartnerCompany: CountryType.map(item => item.Title),
-    FundingPartnerName: Country.map(item => item.Title),
-    ImplementingOrganisation: ImplementingOrganisationList.map(item => item.Title),
-    JVAPDomains: JVAPDomains.map(item => item.DomainName),
-    JVAPPriorities: JVAPPriorities.map(item => item.Priority),
+    Title: Country.map((item) => item.Title),
+    Category: InstitutionTypes.map((item) => item.Title),
+    FundingPartnerCompany: CountryType.map((item) => item.Title),
+    FundingPartnerName: Country.map((item) => item.Title),
+    ImplementingOrganisation: ImplementingOrganisationList.map((item) => item.Title),
+    JVAPDomains: JVAPDomains.map((item) => item.DomainName),
+    JVAPPriorities: JVAPPriorities.map((item) => item.Priority),
   };
 
   return (
@@ -192,9 +218,7 @@ const SubCustomTable: React.FC<SubCustomTableProps> = ({ columns, data, onAdd, o
             <TableRow>
               <TableCell style={{ backgroundColor: headerColor }} padding="checkbox">
                 <Checkbox
-                  indeterminate={
-                    selectedRows.length > 0 && selectedRows.length < rows.length
-                  }
+                  indeterminate={selectedRows.length > 0 && selectedRows.length < rows.length}
                   checked={selectedRows.length === rows.length}
                   onChange={handleSelectAll}
                   icon={<CircleOutlinedIcon />}
@@ -202,7 +226,9 @@ const SubCustomTable: React.FC<SubCustomTableProps> = ({ columns, data, onAdd, o
                 />
               </TableCell>
               {columns.map((column) => (
-                <TableCell style={{ backgroundColor: headerColor }} key={column.id}>{column.label}</TableCell>
+                <TableCell style={{ backgroundColor: headerColor }} key={column.id}>
+                  {column.label}
+                </TableCell>
               ))}
               <TableCell style={{ backgroundColor: headerColor }}>Actions</TableCell>
             </TableRow>
@@ -220,52 +246,46 @@ const SubCustomTable: React.FC<SubCustomTableProps> = ({ columns, data, onAdd, o
                 </TableCell>
                 {columns.map((column) => (
                   <TableCell key={column.id}>
-                    {editingRow === index || newRow === row ? (
+                    {editingRow === index ? (
                       isDropDownField(column.id) ? (
-                        <Select
-                          name={column.id}
+                        <Autocomplete
                           value={row[column.id] || ''}
-                          onChange={
-                            newRow === row
-                              ? handleSelectChangeNewRow
-                              : (event) => handleSelectChangeEditRow(index, event)
-                          }
-                        >
-                          {dropDownOptions[column.id].map((option) => (
-                            <MenuItem key={option} value={option}>
-                              {option}
-                            </MenuItem>
-                          ))}
-                        </Select>
+                          onChange={(_, newValue) => {
+                            if (newRow) {
+                              handleSelectChangeNewRow(column.id, newValue);
+                            } else {
+                              handleSelectChangeEditRow(index, column.id, newValue);
+                            }
+                          }}
+                          options={dropDownOptions[column.id]}
+                          renderInput={(params) => <TextField {...params} />}
+                        />
                       ) : (
                         <TextField
                           name={column.id}
                           value={row[column.id] || ''}
-                          onChange={
-                            newRow === row
-                              ? handleChangeNewRow
-                              : (event) => handleChangeEditRow(index, event)
-                          }
+                          onChange={(event) => {
+                            if (newRow) {
+                              handleChangeNewRow(event);
+                            } else {
+                              handleChangeEditRow(index, event);
+                            }
+                          }}
                         />
                       )
                     ) : (
-                      row[column.id] || ''
+                      row[column.id]
                     )}
                   </TableCell>
                 ))}
                 <TableCell>
                   {editingRow === index ? (
                     <>
-                      <Button onClick={handleSaveEdit}>Save</Button>
+                      <Button onClick={handleSaveNewRow}>Save</Button>
                       <Button onClick={handleCancelNewRow}>Cancel</Button>
                     </>
                   ) : (
-                    newRow === row && (
-                      <>
-                        <Button onClick={handleSaveNewRow}>Save</Button>
-                        <Button onClick={handleCancelNewRow}>Cancel</Button>
-                      </>
-                    )
+                    <Button onClick={() => handleEditRow(index)}>Edit</Button>
                   )}
                 </TableCell>
               </TableRow>

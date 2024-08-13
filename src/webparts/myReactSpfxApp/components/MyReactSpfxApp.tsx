@@ -15,11 +15,13 @@ const columns: Column[] = [
   
   { id: 'InitiativeType', label: 'InitiativeType' },
   { id: 'Approved', label: 'Approved' },
+  { id: 'countryImplementation', label: 'Country(i)es Implementation' },
+  { id: 'donorsNames', label: 'Donor(s)' },
 ];
 
+
 const initialData: RowData[] = [
-  { id: 1, Title: 'Project A', StartYear: '2020', EndYear: '2023', Budget: 1, Status: 'In Progress', InitiativeType:'' },
-  { id: 2, Title: 'Project B', StartYear: '2019', EndYear: '2021', Budget: 500, Status: 'Finished', InitiativeType:'' },
+  { id: 0, Title: '', StartYear: '', EndYear: '', Budget: 0, Status: '', InitiativeType:'', countryImplementation:'',donorsNames:''},
 ];
 
 const MyReactSpfxApp: React.FC<IMyReactSpfxAppProps> = ({ 

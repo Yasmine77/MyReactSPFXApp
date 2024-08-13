@@ -69,7 +69,7 @@ const AddProjectModal: React.FC<AddProjectModalProps> = ({ open, onClose, mode }
               />
             ))}
           </RadioGroup>
-          <ProjectForm initiativeType={selectedPolicyType} project={emptyProject} mode={mode} />
+          <ProjectForm initiativeType={selectedPolicyType} project={emptyProject} mode={mode} selectedProjectId={''} />
         </Box>
       </DialogContent>
     </Dialog>
